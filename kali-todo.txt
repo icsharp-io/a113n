@@ -1,0 +1,917 @@
+
+#########################################
+things to do after installing kali linux
+#########################################
+
+1) fix device not managed error
+
+vi /etc/NetworkManager/NetworkManager.conf
+
+change to "managed=true" under "ifupdown":
+
+[ifupdown]
+managed=true
+
+2) modify apt repository:
+
+vi /etc/apt/sources.list
+deb http://http.kali.org/kali kali-rolling main contrib non-free
+
+deb http://repo.kali.org/kali kali main non-free contrib
+deb http://security.kali.org/kali-security kali/updates main contrib non-free
+deb-src http://repo.kali.org/kali kali main non-free contrib
+deb-src http://security.kali.org/kali-security kali/updates main contrib non-free
+
+# bleeding edge repositories
+deb http://repo.kali.org/kali kali-bleeding-edge main
+#deb-src http://repo.kali.org/kali kali-bleeding-edge main
+
+# debian security updates
+deb http://security.debian.org/ wheezy/updates main contrib non-free
+deb-src http://security.debian.org/ wheezy/updates main contrib non-free
+
+# debian base repository
+deb http://ftp.debian.org/debian wheezy main contrib non-free
+deb-src http://ftp.debian.org/debian wheezy main contrib non-free
+
+# debian stable updates
+deb http://ftp.debian.org/debian wheezy-updates main contrib non-free
+deb-src http://ftp.debian.org/debian wheezy-updates main contrib non-free
+
+# debian stable backports
+deb http://ftp.debian.org/debian wheezy-backports main contrib non-free
+deb-src http://ftp.debian.org/debian wheezy-backports main contrib non-free
+
+3) random utils.
+apt-get install - preload - bleachbit -bum -gnome-do -apt-file -scrub -shutter -figlet
+gedit /root/.bashrc figlet 0xF0Cx0FF
+
+update dsn entries
+gedit /etc/resolv.conf
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+
+apt-get install icedove
+
+#configure ssh
+cd /etc/ssh
+mkdir ssh_backup
+mv ssh_host_* ssh_backup
+dpkg-reconfigure openssh-server
+service ssh start
+service ssh status
+
+
+4) update/upgrade/dist-upgrade
+
+apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y
+
+5) enable sound on boot
+
+apt-get install alsa-utils -y
+
+right click volume icon and select "sound preferences."
+
+switch output volume slider to ON.
+
+6) install archive manager
+
+apt-get install unrar unace rar p7zip zip unzip p7zip-full p7zip-rar file-roller -y
+
+7) add regular user
+
+useradd -m -s /bin/bash username
+passwd username
+adduser username sudo
+adduser username staff
+
+8) install flash:
+
+apt-get install flashplugin-nonfree
+
+update-flashplugin-nonfree --install
+
+9) install system and performance monitoring tools - htop, iotop, collectl, lsof, monit, nmon, sysstat:
+
+apt-get install htop iotop collectl lsof monit nmon sysstat -y
+
+(dstat and vmstat are useful too but should come with kali already)
+
+10) install network and traffic monitoring and analysis tools - nethogs, iftop, vnstat, acct, suricata, nagios, iptraf
+
+apt-get install nethogs iftop vnstat acct suricata iptraf -y
+
+pretty much all the commands can be run or explained by simply typing the command itself
+
+nethogs requires the interface:
+
+nethogs eth0
+nethogs wlan0
+
+acct is a service that should be set to autostart:
+
+/etc/init.d/acct start
+
+11) install lshw (and graphical interface if you want):
+
+apt-get install lshw lshw-gtk -y
+
+to run:
+
+lshw
+
+organized readable output:
+
+lshw -businfo
+
+generate hardware report:
+
+lshw -html
+
+run graphical interface:
+
+lshw-gtk &
+
+other hardware info commands:
+
+hwinfo
+hwinfo --short
+hwinfo | more
+dmidecode
+cat /proc/cpuinfo
+free -m
+cat /proc/version
+
+12) install gdebi package manager and add-apt-repository for PPA repositories:
+
+apt-get install gdebi -y
+
+apt-get install python-software-properties
+apt-get install apt-file
+apt-file update
+
+create the following file to mimic saucy/oneiric/lucid/raring (use any of those) for add-apt-repository to work on kali:
+
+vi /usr/sbin/add-apt-repository
+
+########################################################################
+
+#!/bin/bash
+if [ $# -eq 1 ]
+NM=`uname -a && date`
+NAME=`echo $NM | md5sum | cut -f1 -d" "`
+then
+  ppa_name=`echo "$1" | cut -d":" -f2 -s`
+  if [ -z "$ppa_name" ]
+  then
+    echo "PPA name not found"
+    echo "utility to add PPA repositories in your debian machine"
+    echo "$0 ppa:user/ppa-name"
+  else
+    echo "$ppa_name"
+    echo "deb http://ppa.launchpad.net/$ppa_name/ubuntu saucy main" >> /etc/apt/sources.list
+    apt-get update >> /dev/null 2> /tmp/${NAME}_apt_add_key.txt
+    key=`cat /tmp/${NAME}_apt_add_key.txt | cut -d":" -f6 | cut -d" " -f3`
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key
+    rm -rf /tmp/${NAME}_apt_add_key.txt
+  fi
+else
+  echo "utility to add PPA repositories in your debian machine"
+  echo "$0 ppa:user/ppa-name"
+fi
+
+########################################################################
+
+chmod o+x /usr/sbin/add-apt-repository
+chown root:root /usr/sbin/add-apt-repository
+
+run command as /usr/sbin/add-apt-repository
+
+13) create xkill keyboard shortcut:
+
+go to applications >> system tools >> preferences >> system settings
+
+click "keyboard" and select the "shortcuts" tab.
+
+select "custom shortcuts" on left menu and click the "+" sign at the bottom.
+
+enter:
+
+name: xkill
+command: xkill
+
+once added, select to assign keyboard shortcut (i use alt+super+x)
+
+14) install vpn
+
+apt-get install network-manager-openvpn network-manager-openvpn-gnome network-manager-pptp network-manager-pptp-gnome network-manager-strongswan network-manager-vpnc network-manager-vpnc-gnome
+
+add VPN accounts.
+
+set DNS servers to free/uncensored:
+89.233.43.71
+89.104.194.142
+
+or install dnscrypt and setup (later)
+
+15) install tor/vidalia/privoxy
+
+apt-get install tor vidalia privoxy mixmaster tor-arm apparmor-utils apparmor -y
+
+start vidalia and open settings. click on "advanced." select "use TCP connection (ControlPort)" under "Tor Control". change "Tor Configuration File" value to "/etc/tor/torrc". change Data Directory value to "/var/lib/tor". run commands:
+
+adduser root debian-tor
+chown root:debian-tor /var/lib/tor
+
+edit privoxy config:
+
+vi /etc/privoxy/config
+
+forward socks4a   /   localhost:9050   .
+forward 127.*.*.*/   .
+forward 192.*.*.*/   .
+forward localhost/   .
+
+download and run once adblock plus filter script to create /etc/conf.d/privoxy-blacklist:
+
+https://github.com/Andrwe/privoxy-blocklistc
+
+cd /etc/privoxy
+wget https://raw.github.com/Andrwe/privoxy-blocklist/master/privoxy-blocklist.sh --no-check-certificate
+chmod +x privoxy-blocklist.sh
+sed -i s/^SCRIPTCONF.*/SCRIPTCONF=\\/etc\\/privoxy\\/blocklist.conf/ privoxy-blocklist.sh
+
+create config:
+
+touch /etc/privoxy/blocklist.conf
+
+paste into above file:
+
+###################################################
+
+# Config of privoxy-blocklist
+
+# array of URL for AdblockPlus lists
+#  for more sources just add it within the round brackets
+URLS=(
+"https://easylist-downloads.adblockplus.org/malwaredomains_full.txt"
+"https://easylist-downloads.adblockplus.org/fanboy-social.txt"
+"https://easylist-downloads.adblockplus.org/easyprivacy.txt"
+"https://easylist-downloads.adblockplus.org/easylist.txt"
+"https://easylist-downloads.adblockplus.org/easylistdutch.txt"
+# "https://easylist-downloads.adblockplus.org/easylistdutch+easylist.txt"
+)
+
+# config for privoxy initscript providing PRIVOXY_CONF, PRIVOXY_USER and PRIVOXY_GROUP
+INIT_CONF="/etc/conf.d/privoxy"
+
+# !! if the config above doesn't exist set these variables here !!
+# !! These values will be overwritten by INIT_CONF !!
+PRIVOXY_USER="root"
+PRIVOXY_GROUP="root"
+PRIVOXY_CONF="/etc/privoxy/config"
+
+# name for lock file (default: script name)
+TMPNAME="$(basename ${0})"
+# directory for temporary files
+TMPDIR="/tmp/${TMPNAME}"
+
+# Debug-level
+#   -1 = quiet
+#    0 = normal
+#    1 = verbose
+#    2 = more verbose (debugging)
+#    3 = incredibly loud (function debugging)
+DBG=0
+
+###################################################
+
+run to see if it works:
+
+./privoxy-blocklist.sh
+
+vi /etc/privoxy/blocklist.conf
+
+uncomment line that says "PRIVOXY_USER=" and the 2 lines below it.
+
+run script again to download and install blocklists.
+
+**to block tracking via embedded social media plugins (facebook "like", twitter "follow" etc.), add these lines to the end:
+
+{+block-as-image{Facebook "like" and similar social media tracking URLs.}}
+www.facebook.com/(extern|plugins)/login_status|like(box)?|activity|fan)\.php
+platform.twitter.com/widgets/follow_button?
+plusone.google.com
+
+install obfsproxy:
+
+apt-get install obfsproxy
+
+edit torrc:
+
+vi /etc/tor/torrc
+
+add these lines:
+
+DNSPort 53
+AutomapHostsOnResolve 1
+AutomapHostsSuffixes .exit,.onion
+ServerTransportPlugin obfs3 exec /usr/bin/obfsproxy managed
+
+edit proxychains config:
+
+vi /etc/proxychains.conf
+
+make sure proxy_dns is uncommented and the following is set under [ProxyList]:
+
+socks4	127.0.0.1 9050
+
+edit proxychains hardcoded DNS server to send DNS requests to tor:
+
+vi /usr/lib/proxychains3/proxyresolv
+
+DNS_SERVER=127.0.0.1
+
+if receiving a timeout error or connection refused, for some reason commenting this:
+
+#dig $1 @$DNS_SERVER +tcp | awk '/A.+[0-9]+\.[0-9]+\.[0-9]/{print $5;}'
+
+and adding this, seemed to fix it:
+
+dig $1 @127.0.0.1 53 | awk '/A.+[0-9]+\.[0-9]+\.[0-9]/{print $5;}'
+
+also go to about:config in firefox/iceweasel or chrome://config in chrome and set the following:
+
+network.dns.disablePrefetch = true
+network.proxy.socks_remote_dns = true
+
+start NTP service to avoid tor "no recent usable consensus" error:
+
+service ntp start
+
+restart tor/vidalia and privoxy:
+
+service tor stop
+service privoxy stop
+
+vidalia
+-or-
+service tor start
+-or-
+/etc/init.d/tor start
+
+start privoxy:
+/etc/init.d/privoxy start
+-or-
+service privoxy start
+-or-
+systemctl start privoxy.service
+
+enable privoxy service at boot:
+
+update-rc.d privoxy defaults
+-or-
+systemctl enable privoxy.service
+
+to run a 2nd privoxy service without tor:
+
+copy config directory "privoxy" to "privoxy2":
+
+cp -a /etc/privoxy /etc/privoxy2
+
+edit config file:
+
+vi /etc/privoxy2/config
+
+change the port from 8118 to 8119 for the following:
+
+listen-address 127.0.0.1:8119
+listen address [::1]:8119
+
+comment out forward for tor:
+
+# forward-socks4a	/	127.0.0.1:9050 .
+# forward-socks5	/	127.0.0.1:9050 .
+
+to send only .onion addresses through tor, add the following:
+
+forward-socks4a   .onion               127.0.0.1:9050 .
+
+create init script for privoxy2 (just copy the original one):
+
+cp /etc/init.d/privoxy /etc/init.d/privoxy2
+edit init script:
+
+vi /etc/init.d/privoxy2
+
+change the following:
+
+Provides: privoxy2
+NAME=privoxy2
+DAEMON=/usr/sbin/privoxy
+CONFIGFILE=/etc/privoxy2/config
+
+add privoxy2 to rc-directories:
+
+update-rc.d privoxy2 defaults
+
+start it:
+
+/etc/init.d/privoxy2 start
+
+check to see if there are 2 different privoxy processes:
+
+ps aux | grep privoxy
+
+test proxychains:
+
+proxychains iceweasel notworth.it/getip.php
+
+set browser proxy settings to:
+
+privoxy with tor:
+
+HTTP 127.0.0.1:8118
+HTTPS 127.0.0.1:8118
+SOCKS5 127.0.0.1:9050
+
+privoxy without tor except .onion:
+
+HTTP 127.0.0.1:8119
+HTTP 127.0.0.1:8119
+SOCKS5 127.0.0.1:9050
+
+to add burp suite to proxy chain with tor and privoxy, go to proxy options in burp suite and set proxy to 127.0.0.1:8118. then set browser proxy to 127.0.0.1:8080
+
+install foxyproxy for iceweasel/firefox and proxyswitchy for chrome to switch between proxies more easily.
+
+16) install dnscrypt:
+
+first, get dependencies:
+apt-get install build-essential
+
+download and install latest libsodium package:
+http://download.libsodium.org/libsodium/releases/
+
+wget http://download.libsodium.org/libsodium/releases/libsodium-0.5.0.tar.gz -O - | tar -xz
+
+install library:
+
+cd libsodium-0.5.0/
+./configure && make
+make install
+ldconfig
+cd ..
+rm -rf libsodium*
+
+install resolvconf:
+
+apt-get install resolvconf
+
+download latest dnscrypt package:
+http://download.dnscrypt.org/dnscrypt-proxy/
+
+wget https://download.dnscrypt.org/dnscrypt-proxy/dnscrypt-proxy-1.5.0.tar.gz -O - | tar -xz	
+cd dnscrypt-proxy-1.5.0/
+./configure && make
+make install
+cd ..
+rm -rf dnscrypt-proxy*
+
+add user to run dnscrypt service:
+
+adduser --system --quiet --home /run/dnscrypt --shell /bin/false --group --disabled-password --disabled-login dnscrypt
+
+disable local resolver, restart network manager, and add dnscrypt nameserver entry with resolvconf:
+
+sed -i 's/^dns=dnsmasq/#dns=dnsmasq/g' /etc/NetworkManager/NetworkManager.conf
+service network-manager restart
+echo "nameserver 127.0.0.1" | resolvconf -a lo.dnscrypt
+
+if "address in use" error, change local address from 127.0.0.1 to 127.0.0.3:
+
+exec /usr/local/sbin/dnscrypt-proxy --daemonize --resolver-address=176.56.237.171:443 --provider-key=67C0:0F2C:21C5:5481:45DD:7CB4:6A27:1AF2:EB96:9931:40A3:09B6:2B8D:1653:1185:9C66  --pidfile=/run/dnscrypt-proxy.pid --edns-payload-size=4096 --user=dnscrypt --local-address=127.0.0.3
+
+if permissions error for pid file:
+
+chown root:dnscrypt /run/dnscrypt
+
+set backup DNS servers just in case:
+
+vi /etc/resolv.conf.tail
+
+add:
+
+nameserver 89.233.43.71
+nameserver 89.104.194.142
+
+censurfridns.dk info:
+
+ns1.censurfridns.dk / 89.233.43.71 / 2002:d596:2a92:1:71::53
+ns2.censurfridns.dk / 89.104.194.142 / 2002:5968:c28e::53
+
+start as TCP only (add "-T"):
+
+dnscrypt-proxy start -R dnscrypt.eu-dk -u dnscrypt -a 127.0.0.3 -p /run/dnscrypt-proxy.pid -e 4096 -T
+
+start with full resolver info:
+
+dnscrypt-proxy start -N 2.dnscrypt-cert.resolver1.dnscrypt.eu -r 176.56.237.171:443 -k 67C0:0F2C:21C5:5481:45DD:7CB4:6A27:1AF2:EB96:9931:40A3:09B6:2B8D:1653:1185:9C66 -u dnscrypt -a 127.0.0.3 -p /run/dnscrypt-proxy.pid -e 4096
+
+add -d or --daemonize flag to daemonize dnscrypt-proxy service.
+
+edit network connection and under IPV4 settings, select "Automatic (Addresses only)" then set DNS server to 127.0.0.3.
+
+for IPV6 do the same but set DNS server to ::3
+
+service network-manager restart
+
+i made a script to more easily start/stop/restart the dnscrypt-proxy service.
+
+create dnscrypt.sh and paste the following -or- you can create as /etc/init.d/dnscrypt to run on startup:
+
+########################################
+
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          dnscrypt
+# Required-Start:    $local_fs $remote_fs $named $network $time
+# Required-Stop:     $local_fs $remote_fs $named $network $time
+# Should-Start:	     $syslog
+# Should-Stop:       $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: proxy service for encrypting DNS requests
+# Description:       Daemon for restarting network manager and
+#		     starting the dnscrypt-proxy service.
+### END INIT INFO
+
+# Author: vvn <vvn at notworth dot it>
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DESC="dnscrypt proxy service"
+NAME=dnscrypt-proxy
+PIDFILE=/run/$NAME.pid
+DAEMON=/usr/local/sbin/$NAME
+CHROOTDIR=/run/dnscrypt
+ARGS="-N 2.dnscrypt-cert.resolver1.dnscrypt.eu -r 176.56.237.171:443 -k 67C0:0F2C:21C5:5481:45DD:7CB4:6A27:1AF2:EB96:9931:40A3:09B6:2B8D:1653:1185:9C66 -u dnscrypt -a 127.0.0.3 -p /run/dnscrypt-proxy.pid -e 4096"
+
+#### Explanation of options in above ARGS string
+# (if you want to change providers or settings):
+# -N --provider-name=
+# -r --resolver-address=
+# -k --provider-key=
+# -u --user=
+# -a --local-address=
+# -p --pidfile=
+# -e --edns-payload-size=
+# -T --tcp-only
+# -d --daemonize
+# -L --resolvers-list
+####
+
+SCRIPTNAME=/etc/init.d/dnscrypt
+
+# Gracefully exit if the package has been removed.
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+#
+#	Function that starts the daemon/service.
+#
+d_start() {
+	# Create chroot directory if it does not exist
+	if [ ! -d "$CHROOTDIR" ]; then
+    		mkdir -m 750 $CHROOTDIR
+    		chown root:dnscrypt $CHROOTDIR
+		fi
+	sed -i 's/^dns=dnsmasq/#dns=dnsmasq/g' /etc/NetworkManager/NetworkManager.conf
+	log_action_begin_msg "NetworkManager service restarted"
+	service network-manager restart
+	start-stop-daemon --start --quiet --pidfile $PIDFILE \
+		--exec `/usr/local/sbin/dnscrypt-proxy $ARGS`
+	dnscrypt-proxy start $ARGS
+	log_progress_msg "$NAME service started"
+	echo "nameserver 127.0.0.3" | resolvconf -a lo.dnscrypt
+}
+
+#
+#	Function that stops the daemon/service.
+#
+d_stop() {
+	resolvconf -d lo.dnscrypt
+	start-stop-daemon --stop --retry 5 --quiet --pidfile $PIDFILE \
+		--exec $DAEMON
+	pkill -e dnscrypt-proxy
+	#delete PID file
+	rm -f $PIDFILE
+}
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting $DESC" "$NAME"
+	d_start
+	case "$?" in
+		0) log_end_msg 0 ;;
+		1) log_progress_msg "already started"
+		   log_end_msg 0 ;;
+		*) log_end_msg 1 ;;
+	esac
+	;;
+  stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+	d_stop
+	case "$?" in
+		0) log_end_msg 0 ;;
+		1) log_progress_msg "already stopped"
+		   log_end_msg 0 ;;
+		*) log_end_msg 1 ;;
+	esac
+	;;
+  restart|force-reload)
+	$0 stop
+	$0 start
+	;;
+  status)
+	status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
+	exit 1
+	;;
+esac
+
+:
+
+exit 0
+
+########################################
+
+chown root:dnscrypt dnscrypt.sh -or- chown root:dnscrypt /etc/init.d/dnscrypt
+
+chmod +x dnscrypt.sh -or- chmod +x /etc/init.d/dnscrypt
+
+run with ./dnscrypt.sh start or /etc/init.d/dnscrypt start or service dnscrypt start
+
+you can also just download it here:
+
+wget http://notworth.it/dnscrypt.sh
+
+mv dnscrypt.sh /etc/init.d/dnscrypt
+
+chmod +x /etc/init.d/dnscrypt
+
+update-rc.d dnscrypt defaults
+
+/etc/init.d/dnscrypt start
+
+i apologize in advance if you have any problems with the script, i'm still tweaking it - it works for me though.
+
+17) enable auto-login:
+
+vi /etc/gdm3/daemon.conf
+
+under [daemon] uncomment and set AutomaticLogin = username
+
+[daemon]
+# Enabling automatic login
+  AutomaticLoginEnable = true
+  AutomaticLogin = root
+
+reboot
+
+18) install java JDK:
+
+download from here:
+http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+
+32-bit:
+tar -xzvf jdk-7u60-linux-i586.tar.gz
+
+64-bit:
+tar -xzvf jdk-7u60-linux-x64.tar.gz
+
+mv jdk1.7.0_60 /opt
+cd /opt/jdk1.7.0_60
+
+update-alternatives --install /usr/bin/java java /opt/jdk1.7.0_60/bin/java 1
+update-alternatives --install /usr/bin/javac javac /opt/jdk1.7.0_60/bin/javac 1
+update-alternatives --set java /opt/jdk1.7.0_60/bin/java
+update-alternatives --set javac /opt/jdk1.7.0_60/bin/javac
+
+32-bit:
+update-alternatives --install /usr/lib/mozilla/plugins/libjavaplugin.so mozilla-javaplugin.so /opt/jdk1.7.0_60/jre/lib/i386/libnpjp2.so 1
+update-alternatives --set mozilla-javaplugin.so /opt/jdk1.7.0_60/jre/lib/i386/libnpjp2.so
+
+64-bit:
+update-alternatives --install /usr/lib/mozilla/plugins/libjavaplugin.so mozilla-javaplugin.so /opt/jdk1.7.0_60/jre/lib/amd64/libnpjp2.so 1
+update-alternatives --set mozilla-javaplugin.so /opt/jdk1.7.0_60/jre/lib/amd64/libnpjp2.so
+
+to install java JRE without entire development kit:
+
+download applicable package here:
+
+http://java.com/en/download/manual.jsp
+
+mv jre-7u7-linux-x64.tar.gz /usr/local
+cd /usr/local
+tar zxvf jre-7u7-linux-x64.tar.gz
+rm -rf jre-7*.gz
+
+19) install i2p:
+
+make sure to follow prior instructions on installing PPA repositories before proceeding (#11).
+
+run in terminal:
+
+/usr/sbin/add-apt-repository ppa:i2p-maintainers/i2p
+
+it will download GPG key for i2p.
+
+or add the repositories and download/install the key manually:
+
+wget https://geti2p.net/_static/debian-repo.pub
+apt-key add debian-repo.pub
+
+vi /etc/apt/sources.list.d/i2p.list
+
+paste into file and save:
+
+deb http://deb.i2p2.no/ stable main
+deb-src http://deb.i2p2.no/ stable main
+
+then:
+
+apt-get update
+apt-get install i2p i2p-keyring i2p-router -y
+
+vi /etc/default/i2p
+
+add:
+
+ALLOW_ROOT="true"
+
+run command:
+
+dpkg-reconfigure -plow i2p
+
+i2prouter start
+
+run as daemon:
+
+/etc/init.d/i2p start
+
+configure:
+http://127.0.0.1:7657/confignet
+
+set following options:
+
+externally reaching hostname or ip address:
+- hidden mode (do not publish ip)
+
+ipv6 configuration:
+- prefer ipv4 over ipv6
+
+udp port:
+-completely disable
+
+tcp configuration - externally reachable hostname or ip address:
+- disable inbound (firewalled)
+
+save settings
+
+to use i2p as proxy, set
+
+protocol HTTP
+server - localhost:4444
+
+protocol HTTPS
+server - localhost:4445
+
+to send i2p traffic through privoxy:
+
+vi /etc/privoxy/config
+
+add:
+
+forward .i2p localhost:4444
+
+20) install exFAT support for SD cards:
+
+apt-get install exfat-utils exfat-fuse fuse
+
+mount using command:
+
+mount.exfat-fuse
+
+21) install bluetooth:
+
+aptitude install bluetooth
+
+enable on startup:
+update-rc.d bluetooth defaults
+
+start:
+/etc/init.d/bluetooth start
+
+install and enable bluetooth audio (make sure debian wheezy sources are used):
+
+apt-get install pulseaudio-module-bluetooth pulseaudio-module-gconf bluez-audio blueman
+
+22) install chrome
+
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+vi /etc/apt/sources.list
+
+add following line:
+deb http://dl.google.com/linux/deb/ stable non-free main
+
+or run command:
+
+echo "deb http://dl.google.com/linux/chrome/deb stable main" >> /etc/apt/sources.list.d/google-chrome.list
+
+apt-get update
+
+apt-get install google-chrome-stable
+
+create chrome profile directory:
+
+mkdir /home/username/chrome
+
+run as root with:
+
+google-chrome-stable --user-data-dir=/home/username/chrome
+
+run as different user:
+
+sudo -u username google-chrome-stable
+
+23) install AMD proprietary driver:
+
+before you do this, make sure the latest driver supports your video card. if it doesn't, go to the AMD site and download the appropriate driver for your card. in fact, just download the package from the AMD downloads site and run it - it should automatically do everything :P
+
+here's the hard way, for supported video cards:
+
+apt-get install firmware-linux-nonfree
+apt-get install amd-opencl-icd
+apt-get install linux-headers-$(uname -r)
+
+apt-get install fglrx-atieventsd fglrx-driver fglrx-control fglrx-modules-dkms -y
+
+a bunch of windows will pop up; unless it's an error just select "YES"
+
+test:
+
+fglrxinfo
+fgl_glxgears
+
+generate xorg.conf file:
+
+aticonfig --initial -f
+
+xorg.conf file will be located in /etc/X11 directory
+
+vi /boot/grub/grub.cfg
+
+add "radeon.modeset=0" at end of following line as such:
+
+linux    /boot/vmlinuz-3.14-kali1-<differs depending on 32/64 bit> root=UUID=<some long-ass string> ro initrd=/install/gtk/initrd.gz quiet radeon.modeset=0
+
+reboot
+
+launch catalyst control center:
+
+amdcccle
+
+24) if you want to chat/email you can download icedove (thunderbird for linux) and pidgin (need to install and enable OTR plugin).
+
+apt-get install icedove pidgin pidgin-otr -y
+
+25) to install bittorrent and transmission GUI:
+
+apt-get install bittorrent transmission
+
+OTHER LINKS/REFERENCES:
+
+list of free/uncensored/anonymous DNS servers:
+http://notworth.it/dnsserverlist.txt
+
+list of keyboard shortcuts for vim editor:
+http://notworth.it/vi-shortcuts.txt
+
+dnscrypt service start/stop/restart script:
+http://notworth.it/dnscrypt.sh
+
+add-apt-repository script:
+http://notworth.it/add-apt-repository.sh
+
+privoxy blocklist conf file:
+http://notworth.it/blocklist.conf
+
+
+
+netsh trace start persistent=yes capture=yes tracefile=c:\temp\nettrace-boot.etl
+reboot
+netsh trace stop
